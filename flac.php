@@ -8,6 +8,7 @@
  *
  * Edit on 8th December 2013 by François LASSERRE <choiz@me.com>
  * - Add average bitrate and filesize
+ * - Remove round on streamDuration
  *
  * This code is based upon the really great FLAC-Project by Josh Coalson
  * http://flac.sourceforge.net
@@ -121,7 +122,7 @@ class Flac
                 $this->streamChannels = ($data['samplerate_channels_bitrate_samples'] >> 41 & 7) + 1;
                 $this->streamBitsPerSample = ($data['samplerate_channels_bitrate_samples'] >> 36 & 31) + 1;
                 $this->streamTotalSamples = $data['samplerate_channels_bitrate_samples'] & 68719476735;
-                $this->streamDuration = round($this->streamTotalSamples / $this->streamSampleRate);
+                $this->streamDuration = $this->streamTotalSamples / $this->streamSampleRate;
                 $this->streamSize = $metaBlockLength;
                 if (!preg_match('/^[0-9a-f]{32}$/', $data['md5'])) throw new ErrorException(self::ERR_META_INVALID, E_USER_ERROR);
                 $this->streamMd5 = $data['md5'];
