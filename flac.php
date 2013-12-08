@@ -1,10 +1,13 @@
-<?PHP
+<?php
 
 /**
  * @license GNU General Public License http://www.gnu.org/licenses/licenses.html#GPL
  * @author BlueMöhre <bluemoehre@gmx.de>
  * @copyright 2012 BlueMöhre
  * @link http://www.github.com/bluemoehre
+ *
+ * Edit on 8th December 2013 by François LASSERRE <choiz@me.com>
+ * - Add average bitrate and filesize
  *
  * This code is based upon the really great FLAC-Project by Josh Coalson
  * http://flac.sourceforge.net
@@ -31,7 +34,9 @@ class Flac
 
 
     protected $file = null;
+    protected $filesize = null;
     protected $fileHandle = null;
+    protected $averageBitrate = null;
     protected $streamMetaBlocks = null;
     protected $streamMinBlockSize = null;
     protected $streamMaxBlockSize = null;
@@ -56,6 +61,8 @@ class Flac
         if (!$this->fileHandle = @fopen($file,'rb')) throw new ErrorException(self::ERR_FILE_UNREADABLE, E_USER_ERROR);
         if ($this->read(4) != 'fLaC') throw new ErrorException(self::ERR_FILE_INVALID, E_USER_ERROR);
         $this->fetchMetaBlocks();
+        $this->filesize = filesize($file);
+        $this->averageBitrate = $this->filesize * 8 / $this->streamDuration / 1000;
     }
 
 
@@ -115,6 +122,7 @@ class Flac
                 $this->streamBitsPerSample = ($data['samplerate_channels_bitrate_samples'] >> 36 & 31) + 1;
                 $this->streamTotalSamples = $data['samplerate_channels_bitrate_samples'] & 68719476735;
                 $this->streamDuration = round($this->streamTotalSamples / $this->streamSampleRate);
+                $this->streamSize = $metaBlockLength;
                 if (!preg_match('/^[0-9a-f]{32}$/', $data['md5'])) throw new ErrorException(self::ERR_META_INVALID, E_USER_ERROR);
                 $this->streamMd5 = $data['md5'];
             }
@@ -199,5 +207,3 @@ class Flac
     }
 
 }
-
-?>
